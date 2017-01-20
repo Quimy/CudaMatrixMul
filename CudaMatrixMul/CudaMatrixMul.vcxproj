@@ -33,6 +33,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="MatrixMultiplication.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MatrixMultiplication.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5824C828-00FF-4358-9CDD-08B6461E9C15}</ProjectGuid>

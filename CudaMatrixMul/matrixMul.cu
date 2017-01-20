@@ -233,7 +233,6 @@ int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA)
 
     printf("Checking computed result for correctness: ");
     bool correct = true;
-
     for (int i = 0; i < (int)(dimsC.x * dimsC.y); i++)
     {
         if (fabs(h_C[i] - (dimsA.x * valB)) > 1e-5)
