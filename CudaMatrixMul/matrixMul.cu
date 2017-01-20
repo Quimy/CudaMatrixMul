@@ -48,12 +48,12 @@ matrixMulCUDA(float *C, float *A, float *B, int wA)
     // Thread index
     int tx = threadIdx.x;
     int ty = threadIdx.y;
-	float C_local = 0;
 
 	
 	int numberOfComputedCells = wA / BLOCK_SIZE;
 	for (int i = 0; i < numberOfComputedCells; i++) {
 		for (int j = 0; j < numberOfComputedCells; j++) {
+			float C_local = 0;
 			for (int k = 0; k < wA; k++) {
 				float A_d_element = A[ty*wA + k + i*wA*BLOCK_SIZE];
 				float B_d_element = B[k*wA + tx + j*BLOCK_SIZE];
@@ -239,6 +239,7 @@ int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA)
         {
             printf("Error! Matrix[%05d]=%.8f, ref=%.8f error term is > 1e-5\n", i, h_C[i], dimsA.x*valB);
             correct = false;
+			break;
         }
     }
 
@@ -274,7 +275,7 @@ int main(int argc, char **argv)
 {
     printf("[Matrix Multiply Using CUDA] - Starting...\n");
 
-	int n = 1; // wczytywane z konsoli
+	int n = 5; // wczytywane z konsoli
     // By default, we use device 0, otherwise we override the device ID based on what is provided at the command line
     int devID = 0;
 	
