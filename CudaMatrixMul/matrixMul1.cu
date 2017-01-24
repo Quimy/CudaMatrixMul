@@ -71,38 +71,26 @@ void constantInit(float *data, int size, float val)
 /**
 * Run a simple test of matrix multiplication using CUDA
 */
-int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA)
+int matrixMultiply(int argc, char **argv, int block_size, int matrixSize)
 {
-	// Allocate host memory for matrices A and B
-	unsigned int size_A = dimsA.x * dimsA.y;
-	unsigned int mem_size_A = sizeof(float) * size_A;
-	float *h_A = (float *)malloc(mem_size_A);
-	unsigned int size_B = dimsA.x * dimsA.y;
-	unsigned int mem_size_B = sizeof(float) * size_B;
-	float *h_B = (float *)malloc(mem_size_B);
+	unsigned int mem_size = sizeof(float) * matrixSize;
+
+	float *h_A = (float *)malloc(mem_size);
+	float *h_B = (float *)malloc(mem_size);
 
 	// Initialize host memory
 	const float valB = 0.01f;
-	constantInit(h_A, size_A, 1.0f);
-	constantInit(h_B, size_B, valB);
+	constantInit(h_A, matrixSize, 1.0f);
+	constantInit(h_B, matrixSize, valB);
+
+	float *h_C = (float *)malloc(mem_size);
 
 	// Allocate device memory
 	float *d_A, *d_B, *d_C;
 
-	// Allocate host matrix C
-	dim3 dimsC(dimsA.x, dimsA.y, 1);
-	unsigned int mem_size_C = dimsC.x * dimsC.y * sizeof(float);
-	float *h_C = (float *)malloc(mem_size_C);
-
-	if (h_C == NULL)
-	{
-		fprintf(stderr, "Failed to allocate host matrix C!\n");
-		exit(EXIT_FAILURE);
-	}
-
 	cudaError_t error;
 
-	error = cudaMalloc((void **)&d_A, mem_size_A);
+	error = cudaMalloc((void **)&d_A, mem_size);
 
 	if (error != cudaSuccess)
 	{
@@ -110,7 +98,7 @@ int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA)
 		exit(EXIT_FAILURE);
 	}
 
-	error = cudaMalloc((void **)&d_B, mem_size_B);
+	error = cudaMalloc((void **)&d_B, mem_size);
 
 	if (error != cudaSuccess)
 	{
@@ -270,19 +258,15 @@ int main(int argc, char **argv)
 {
 	printf("[Matrix Multiply Using CUDA] - Starting...\n");
 
-	int n = 5; // wczytywane z konsoli
-			   // By default, we use device 0, otherwise we override the device ID based on what is provided at the command line
-	int devID = 0;
-
 	cudaError_t error;
 	cudaDeviceProp deviceProp;
-	error = cudaGetDevice(&devID);
+	error = cudaGetDevice(0);
 
 	if (error != cudaSuccess) {
 		printf("cudaGetDevice returned error code %d, line(%d)\n", error, __LINE__);
 	}
 
-	error = cudaGetDeviceProperties(&deviceProp, devID);
+	error = cudaGetDeviceProperties(&deviceProp, 0);
 
 	if (deviceProp.computeMode == cudaComputeModeProhibited) {
 		fprintf(stderr, "Error: device is running in <Compute Mode Prohibited>, no threads can use ::cudaSetDevice().\n");
@@ -294,14 +278,20 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		printf("GPU Device %d: \"%s\" with compute capability %d.%d\n\n", devID, deviceProp.name, deviceProp.major, deviceProp.minor);
+		printf("GPU Device %d: \"%s\" with compute capability %d.%d\n\n", 0, deviceProp.name, deviceProp.major, deviceProp.minor);
+	}
+
+	int n = 5; //mno¿nik wielkoœci bloku
+
+	if (argc > 1) {
+		n = atoi(argv[1]);
 	}
 
 	int block_size = 32;
-	int matrixSize = n * block_size;
-	dim3 dimsA(matrixSize, matrixSize, 1);
 
-	int matrix_result = matrixMultiply(argc, argv, block_size, dimsA);
+	int matrixSize = n * block_size;
+
+	int matrix_result = matrixMultiply(argc, argv, block_size, matrixSize);
 
 	exit(matrix_result);
 }
